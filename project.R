@@ -36,6 +36,8 @@ text(tree, pretty = 0, cex = 0.7)
 pred_tree = predict(tree, newdata = cleaned_student_por[-training_sets[[1]],])
 mean((pred_tree - cleaned_student_por[-training_sets[[1]], 'G3'])^2)
 
+Student = cleaned_student_por
+
 #converting Mjob to binary attributes
 Student$MTeacherJob = ifelse(Student$Mjob == "teacher", 1, 0)
 Student$MHealthJob = ifelse(Student$Mjob == "health", 1, 0)
