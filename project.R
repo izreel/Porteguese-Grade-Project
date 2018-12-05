@@ -2,40 +2,10 @@
 library(tree)
 
 #import dataset using from text (base) and make sure heading is on yes
-#cleaned_student_por <- read.csv("cleaned_student_por.csv", sep="")
+cleaned_student_por <- read.csv("~/cleaned_student_por.csv", sep="")
 
-
-#Setting Training Sets
-set.seed(1)
-training_sets = list()
-for( i in 1:10) {
-  training_sets[[i]] = sample(nrow(cleaned_student_por), 0.8*nrow(cleaned_student_por))  
-}
-
-#Determining attributes to use
-
-#determining if a tree created from data will need pruning
-tree = tree(G3~., cleaned_student_por)
-plot(tree)
-text(tree, pretty = 0, cex = 0.7)
-
-pruning_tree = cv.tree(tree)
-pruning_tree
-plot(pruning_tree, type = 'b')
-min_dev = min(pruning_tree$dev)
-pruned.tree = prune.tree(tree, best = pruning_tree$size[which(pruning_tree$dev == min_dev)])
-plot(pruned.tree)
-text(pruned.tree, pretty = 0, cex = 0.7)
-
-
-#Regression Tree
-tree = tree(G3~., cleaned_student_por, subset = training_sets[[1]] )
-plot(tree)
-text(tree, pretty = 0, cex = 0.7)
-
-pred_tree = predict(tree, newdata = cleaned_student_por[-training_sets[[1]],])
-mean((pred_tree - cleaned_student_por[-training_sets[[1]], 'G3'])^2)
-
+#creating another dataframe where it will contain the factor attributes of the originial dataset as 
+#binary attributes
 Student = cleaned_student_por[, c('age', 'studytime','traveltime','failures', 'famrel',
                                   'goout', 'Dalc', 'Walc', 'health', 'absences', 'G1', 'G2', 'G3')]
 
@@ -80,22 +50,34 @@ Student$internet = ifelse(cleaned_student_por$internet == "yes", 1, 0)
 Student$romantic = ifelse(cleaned_student_por$romantic == "yes", 1, 0)
 Student$paid = ifelse(cleaned_student_por$paid == "yes", 1, 0)
 
-#Linear Regression
-attach(Student)
-lm.fit <-lm(G3~., data=Student)
-summary(lm.fit)
-
-lm_errors = vector()
-signi = c('G1', 'G2', 'MHealthJob', 'MServiceJob', 'failures', 'RCourse', 'traveltime')
-for(i in 1:10){
-  linear_regression = lm(G3~G1+ G2 + MHealthJob + MServiceJob + failures + RCourse + traveltime, data = Student, 
-                         subset = training_sets[[i]])
-  lm_pred = predict(linear_regression, newdata = Student[-training_sets[[i]],signi])
-  lm_errors = c(lm_errors,mean((lm_pred - cleaned_student_por[-training_sets[[i]], 'G3'])^2))
+#Setting Training Sets
+set.seed(1)
+training_sets = list()
+for( i in 1:10) {
+  training_sets[[i]] = sample(nrow(cleaned_student_por), 0.8*nrow(cleaned_student_por))  
 }
 
-lm_errors
+#Determining attributes to use for 
+lm.fit <-lm(G3~., data=Student)
+summary(lm.fit)
+signi = c('G1', 'G2', 'MHealthJob', 'MServiceJob', 'failures', 'RCourse', 'traveltime')
 
+#determining if a tree created from data will need pruning
+tree = tree(G3~., cleaned_student_por)
+plot(tree)
+text(tree, pretty = 0, cex = 0.7)
+
+pruning_tree = cv.tree(tree)
+pruning_tree
+plot(pruning_tree, type = 'b')
+min_dev = min(pruning_tree$dev)
+pruned.tree = prune.tree(tree, best = pruning_tree$size[which(pruning_tree$dev == min_dev)])
+plot(pruned.tree)
+text(pruned.tree, pretty = 0, cex = 0.7)
+
+
+#Regression Tree
+#creates a tree for each test set and then calculate MSE for each test set. Will also calculate overall mean error
 rt_errors = vector()
 for(i in 1:10)
 {
@@ -103,5 +85,27 @@ for(i in 1:10)
   pred_tree = predict(tree, newdata = cleaned_student_por[-training_sets[[i]],])
   rt_errors = c(rt_errors, mean((pred_tree - cleaned_student_por[-training_sets[[i]], 'G3'])^2))
 }
-
 rt_errors
+mean(rt_errors)
+
+
+
+#Linear Regression
+#the same as with the regression but with linear regression
+lm_errors = vector()
+for(i in 1:10){
+  linear_regression = lm(G3~G1+ G2 + MHealthJob + MServiceJob + failures + RCourse + traveltime, data = Student, 
+                         subset = training_sets[[i]])
+  lm_pred = predict(linear_regression, newdata = Student[-training_sets[[i]],signi])
+  lm_errors = c(lm_errors,mean((lm_pred - cleaned_student_por[-training_sets[[i]], 'G3'])^2))
+}
+lm_errors
+mean(lm_errors)
+
+#Inference comparison
+tree = tree(G3~., cleaned_student_por)
+plot(tree)
+text(tree, pretty = 0, cex = 0.7)
+
+lm.fit <-lm(G3~., data=Student)
+summary(lm.fit)
