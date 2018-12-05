@@ -86,12 +86,12 @@ lm.fit <-lm(G3~., data=Student)
 summary(lm.fit)
 
 lm_errors = vector()
-signi = c('G1', 'G2', 'MHealthJob', 'MServiceJob', 'failures', 'RCourse', 'traveltime', 'FTeacherJob', 'FServiceJob')
+signi = c('G1', 'G2', 'MHealthJob', 'MServiceJob', 'failures', 'RCourse', 'traveltime')
 for(i in 1:10){
-  linear_regression = lm(G3~G1+ G2 + MHealthJob + MServiceJob + failures + RCourse + traveltime + FTeacherJob + FServiceJob, data = Student, 
+  linear_regression = lm(G3~G1+ G2 + MHealthJob + MServiceJob + failures + RCourse + traveltime, data = Student, 
                          subset = training_sets[[i]])
   lm_pred = predict(linear_regression, newdata = Student[-training_sets[[i]],signi])
-  lm_errors = c(lm_errors,mean((pred_tree - cleaned_student_por[-training_sets[[i]], 'G3'])^2))
+  lm_errors = c(lm_errors,mean((lm_pred - cleaned_student_por[-training_sets[[i]], 'G3'])^2))
 }
 
 lm_errors
