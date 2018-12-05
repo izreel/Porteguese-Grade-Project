@@ -15,7 +15,7 @@ for( i in 1:10) {
 #Determining attributes to use
 
 #determining if a tree created from data will need pruning
-tree = tree(G3~., cleaned_student_por)
+tree = tree(G3~.- G2 - G1, cleaned_student_por)
 plot(tree)
 text(tree, pretty = 0, cex = 0.7)
 
@@ -23,13 +23,13 @@ pruning_tree = cv.tree(tree)
 pruning_tree
 plot(pruning_tree, type = 'b')
 min_dev = min(pruning_tree$dev)
-tree = prune.tree(tree, best = pruning_tree$size[which(pruning_tree$dev == min_dev)])
-plot(tree)
-text(tree, pretty = 0, cex = 0.7)
+pruned.tree = prune.tree(tree, best = pruning_tree$size[which(pruning_tree$dev == min_dev)])
+plot(pruned.tree)
+text(pruned.tree, pretty = 0, cex = 0.7)
 
 
 #Regression Tree
-tree = tree(G3~., cleaned_student_por, subset = training_sets[[1]] )
+tree = tree(G3~.- G2, cleaned_student_por, subset = training_sets[[1]] )
 plot(tree)
 text(tree, pretty = 0, cex = 0.7)
 
@@ -89,3 +89,4 @@ lm.fit <-lm(G3~school+sex+age+address+famsize+Pstatus+
             failures+schoolsup+famsup+paid+activities+nursery+romantic+famrel+
             freetime+goout+Dalc+Walc+health+absences, data=Student)
 summary(lm.fit)
+
