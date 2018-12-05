@@ -95,3 +95,13 @@ for(i in 1:10){
 }
 
 lm_errors
+
+rt_errors = vector()
+for(i in 1:10)
+{
+  tree = tree(G3~., cleaned_student_por, subset = training_sets[[i]] )
+  pred_tree = predict(tree, newdata = cleaned_student_por[-training_sets[[i]],])
+  rt_errors = c(rt_errors, mean((pred_tree - cleaned_student_por[-training_sets[[i]], 'G3'])^2))
+}
+
+rt_errors
